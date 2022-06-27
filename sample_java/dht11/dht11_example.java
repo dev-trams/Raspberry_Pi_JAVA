@@ -1,13 +1,10 @@
-import java.util.List;
-import java.util.ArrayList;
-
 import com.pi4j.wiringpi.Gpio;
 import com.pi4j.wiringpi.GpioUtil;
 
 public class DHT11 {
 	private static final int MAXTIMINGS = 85;
 	private int[] dht11_dat = { 0, 0, 0, 0, 0 };
-
+	private int pin = 7;
 	public DHT11() {
 
 	    // setup wiringPi
@@ -16,7 +13,7 @@ public class DHT11 {
 	        return;
 	    }
 
-	   GpioUtil.export(5, GpioUtil.DIRECTION_OUT);            
+	   GpioUtil.export(pin, GpioUtil.DIRECTION_OUT);            
 	}
 
 	public void getTemperature() {
@@ -24,17 +21,16 @@ public class DHT11 {
 	   int j = 0;
 	   dht11_dat[0] = dht11_dat[1] = dht11_dat[2] = dht11_dat[3] = dht11_dat[4] = 0;
 	   StringBuilder value = new StringBuilder();
-
-	   Gpio.pinMode(5, Gpio.OUTPUT);
-	   Gpio.digitalWrite(5, Gpio.LOW);
+	   Gpio.pinMode(pin, Gpio.OUTPUT);
+	   Gpio.digitalWrite(pin, Gpio.LOW);
 	   Gpio.delay(18);
  
-	   Gpio.digitalWrite(5, Gpio.HIGH);        
-	   Gpio.pinMode(5, Gpio.INPUT);
+	   Gpio.digitalWrite(pin, Gpio.HIGH);        
+	   Gpio.pinMode(pin, Gpio.INPUT);
 
 	   for (int i = 0; i < MAXTIMINGS; i++) {
 	      int counter = 0;
-	      while (Gpio.digitalRead(5) == laststate) {
+	      while (Gpio.digitalRead(pin) == laststate) {
 	          counter++;
 	          Gpio.delayMicroseconds(1);
 	          if (counter == 255) {
@@ -42,7 +38,7 @@ public class DHT11 {
 	          }
 	      }
 
-	      laststate = Gpio.digitalRead(5);
+	      laststate = Gpio.digitalRead(pin);
 
 	      if (counter == 255) {
 	          break;
@@ -61,9 +57,9 @@ public class DHT11 {
 	    // check we read 40 bits (8bit x 5 ) + verify checksum in the last
 	    // byte
         System.out.println(j);
-        float h = (float)((dht11_dat[0] << 8) + dht11_dat[1]) / 10;
-        System.out.println(h);
 	    if ((j >= 40) && checkParity()) {
+			float h = (float)((dht11_dat[0] << 8) + dht11_dat[1]) / 10;
+
 	        if ( h > 100 )
 	        {
 	            h = dht11_dat[0];   // for DHT11
